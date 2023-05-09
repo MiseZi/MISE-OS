@@ -29,6 +29,7 @@ impl Log for SimpleLogger {
     fn flush(&self) {}
 }
 
+#[allow(dead_code)]
 pub fn init() {
     static LOGGER: SimpleLogger = SimpleLogger;
     log::set_logger(&LOGGER).unwrap();
@@ -46,34 +47,34 @@ pub fn init() {
 #[macro_export]
 macro_rules! trace {
     ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::console::print(format_args!("\x1B[90m{}\x1B[0m\n", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
+        $crate::console::print(format_args!("\x1B[90m{}\x1B[0m", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
     }
 }
 
 #[macro_export]
 macro_rules! debug {
     ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::console::print(format_args!("\x1B[32m{}\x1B[0m\n", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
+        $crate::console::print(format_args!("\x1B[32m{}\x1B[0m", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
     }
 }
 
 #[macro_export]
 macro_rules! info {
     ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::console::print(format_args!("\x1B[34m{}\x1B[0m\n", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
+        $crate::console::print(format_args!("\x1B[34m{}\x1B[0m", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
     }
 }
 
 #[macro_export]
 macro_rules! warn {
     ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::console::print(format_args!("\x1B[93m{}\x1B[0m\n", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
+        $crate::console::print(format_args!("\x1B[93m{}\x1B[0m", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
     }
 }
 
 #[macro_export]
 macro_rules! error {
     ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::console::print(format_args!("\x1B[31m{}\x1B[0m\n", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
+        $crate::console::print(format_args!("\x1B[31m{}\x1B[0m", format_args!(concat!($fmt, "\n") $(, $($arg)+)?)));
     }
 }

@@ -1,8 +1,6 @@
-
-
-use crate::{println, batch::run_next_app};
+use crate::{batch::run_next_app, info};
 
 pub fn sys_exit(xstate: i32) -> ! {
-    println!("[kernel] Application exited with code {}", xstate);
+    info!("[kernel] Application exited with code {}", xstate);
     run_next_app()
 }

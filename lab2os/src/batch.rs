@@ -1,8 +1,8 @@
 use lazy_static::*;
-use crate::println;
-use crate::trap::context::TrapContext;
+use crate::{println, debug};
+use crate::trap::TrapContext;
 use crate::sync::UPSafeCell;
-use core::arch::asm;
+use core::arch::{asm, global_asm};
 
 const USER_STACK_SIZE: usize = 4096 * 2;
 const KERNEL_STACK_SIZE: usize = 4096 * 2;
@@ -58,7 +58,7 @@ impl AppManager {
         if app_id >= self.num_app {
             panic!("All applications completed!");
         }
-        println!("[kernel] Loading app_{}", app_id);
+        debug!("[kernel] Loading app_{}", app_id);
         // clear icache
         asm!("fence.i");
         // clear app area
@@ -83,6 +83,8 @@ impl AppManager {
         self.current_app += 1;
     }
 }
+
+global_asm!(include_str!("link_app.S"));
 
 lazy_static! {
     static ref APP_MANAGER: UPSafeCell<AppManager> = unsafe { UPSafeCell::new({

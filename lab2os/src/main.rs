@@ -5,8 +5,6 @@
 
 use core::arch::global_asm;
 
-use crate::sbi::shutdown;
-
 mod lang_items;
 mod sbi;
 mod console;
@@ -28,7 +26,9 @@ pub fn rust_main() -> ! {
     warn!("Run normal.");
     info!("Run normal.");
     debug!("Run normal.");
-    loop {};
+    trap::init();
+    batch::init();
+    batch::run_next_app();
 }
 
 fn clean_bss() {
