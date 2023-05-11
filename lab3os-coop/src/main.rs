@@ -5,7 +5,7 @@
 
 use core::arch::global_asm;
 
-use crate::{task::run_first_task, loader::load_apps};
+
 
 mod lang_items;
 mod sbi;
@@ -32,8 +32,8 @@ pub fn rust_main() -> ! {
     info!("Run normal.");
     debug!("Run normal.");
     trap::init();
-    load_apps();
-    run_first_task();
+    loader::load_apps();
+    task::run_first_task();
     panic!("Shutdown!");
 }
 
