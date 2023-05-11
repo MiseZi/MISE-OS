@@ -5,15 +5,21 @@
 
 use core::arch::global_asm;
 
+use crate::{task::run_first_task, loader::load_apps};
+
 mod lang_items;
 mod sbi;
 mod console;
 mod sync;
 mod logging;
+mod loader;
+mod config;
 pub mod syscall;
 pub mod trap;
+pub mod task;
 
 global_asm!(include_str!("entry.asm"));
+global_asm!(include_str!("link_user.S"));
 
 #[no_mangle]
 pub fn rust_main() -> ! {
@@ -25,9 +31,9 @@ pub fn rust_main() -> ! {
     warn!("Run normal.");
     info!("Run normal.");
     debug!("Run normal.");
-    //trap::init();
-    //batch::init();
-    //batch::run_next_app();
+    trap::init();
+    load_apps();
+    run_first_task();
     panic!("Shutdown!");
 }
 

@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./lab3os-coop/Cargo.toml",
+        "./lab3os-coop/Cargo.toml",
+        "./lab3os-coop/Cargo.toml",
+        "./lab3os-coop/Cargo.toml"
+    ]
+}
