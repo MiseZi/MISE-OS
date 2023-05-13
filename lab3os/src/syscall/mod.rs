@@ -4,7 +4,7 @@ mod process;
 use fs::sys_write;
 use process::sys_exit;
 
-use self::process::sys_yield;
+use self::process::{sys_yield, sys_get_time};
 
 const SYSCALL_WRITE: usize = 64;
 const SYSCALL_EXIT: usize = 93;

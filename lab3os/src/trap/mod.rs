@@ -1,6 +1,6 @@
 use core::arch::global_asm;
-use riscv::register::{stvec, mtvec::TrapMode, scause::{self, Trap, Exception}, stval};
-use crate::{syscall::syscall, warn};
+use riscv::register::{stvec, mtvec::TrapMode, scause::{self, Trap, Exception}, stval, sie};
+use crate::{syscall::syscall, warn, timer::set_next_trigger, task::suspend_current_and_run_next};
 pub use context::TrapContext;
 
 mod context;
@@ -12,6 +12,10 @@ pub fn init() {
     unsafe {
         stvec::write(__alltraps as usize, TrapMode::Direct);
     }
+}
+
+pub fn enable_timer_interrupt() {
+    unsafe { sie::set_stimer(); }
 }
 
 #[no_mangle]
@@ -32,6 +36,10 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
         Trap::Exception(Exception::IllegalInstruction) => {
             warn!("[kernel] IllegalInstruction in application, kernel killed it.");
             crate::task::exit_current_and_run_next();
+        }
+        Trap::Interrupt(scause::Interrupt::SupervisorTimer) => {
+            set_next_trigger();
+            suspend_current_and_run_next();
         }
         _ => {
             panic!("Unsupported trap {:?}, stval = {:#x}!", scause.cause(), stval);

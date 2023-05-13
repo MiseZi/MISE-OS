@@ -1,4 +1,4 @@
-use crate::{task::{exit_current_and_run_next, suspend_current_and_run_next}, println};
+use crate::{task::{exit_current_and_run_next, suspend_current_and_run_next}, println, timer::get_time_ms};
 
 pub fn sys_exit(exit_code: i32) -> ! {
     println!("[kernel] Application exited with code {}", exit_code);
@@ -12,5 +12,5 @@ pub fn sys_yield() -> isize {
 }
 
 pub fn sys_get_time() -> isize {
-    get_time_us() as isize;
+    get_time_ms() as isize
 }

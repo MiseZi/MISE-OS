@@ -39,5 +39,5 @@ pub fn sleep(t: usize) {
 }
 
 pub fn set_timer(timer: usize) {
-    sbi_call(SBI_SET_TIMER, timer, 0, 0);
+    sbi_rt::set_timer(timer as _);
 }
