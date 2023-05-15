@@ -4,7 +4,6 @@ mod switch;
 #[allow(clippy::module_inception)]
 mod task;
 
-use core::num::IntErrorKind;
 
 use lazy_static::lazy_static;
 use crate::{loader::{get_num_app, init_app_cx}, sync::UPSafeCell, config::MAX_APP_NUM, timer::get_time_ms, println};

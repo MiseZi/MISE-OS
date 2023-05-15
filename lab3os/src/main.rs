@@ -5,8 +5,6 @@
 
 use core::arch::global_asm;
 
-
-
 mod lang_items;
 mod sbi;
 mod console;
@@ -36,6 +34,15 @@ pub fn rust_main() -> ! {
     loader::load_apps();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
+
+    trap::enable_kernel_interrupt();
+    loop {
+        if trap::check_kernel_interrupt() {
+            println!("Kernel interrupt returned");
+            break;
+        }
+    }
+
     task::run_first_task();
     panic!("Shutdown!");
 }
