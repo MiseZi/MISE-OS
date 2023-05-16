@@ -2,8 +2,13 @@
 #![no_std]                  //不使用标准库
 #![no_main]
 #![feature(panic_info_message)]
+#![feature(alloc_error_handler)]
+
+extern crate alloc;
 
 use core::arch::global_asm;
+
+use crate::mm::heap_allocator::heap_test;
 
 mod lang_items;
 mod sbi;
@@ -13,6 +18,7 @@ mod logging;
 mod loader;
 mod config;
 mod timer;
+mod mm;
 pub mod syscall;
 pub mod trap;
 pub mod task;
@@ -31,6 +37,7 @@ pub fn rust_main() -> ! {
     info!("Run normal.");
     debug!("Run normal.");
     trap::init();
+    mm::heap_allocator::init_heap();
     loader::load_apps();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
@@ -42,7 +49,7 @@ pub fn rust_main() -> ! {
             break;
         }
     }
-
+    heap_test();
     task::run_first_task();
     panic!("Shutdown!");
 }
