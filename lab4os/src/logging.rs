@@ -2,6 +2,7 @@ use log::{self, Level, LevelFilter, Log, Metadata, Record};
 
 use crate::println;
 
+
 struct SimpleLogger;
 
 impl Log for SimpleLogger {

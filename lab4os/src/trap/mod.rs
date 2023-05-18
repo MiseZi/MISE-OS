@@ -1,3 +1,6 @@
+//! System trap handler.
+
+
 use core::arch::global_asm;
 use riscv::register::{stvec, mtvec::TrapMode, scause::{self, Trap, Exception}, stval, sie, sstatus};
 use crate::{syscall::syscall, warn, timer::set_next_trigger, task::suspend_current_and_run_next, println};

@@ -1,15 +1,21 @@
-//MAIN
+//! The Entry of rCore
+
 #![no_std]                  //不使用标准库
-#![no_main]
+#![no_main]                 //不使用自带main函数，使用rust_main()
+//#![deny(missing_docs)]
+//#![deny(warnings)]
 #![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
+#[macro_use]
+extern crate bitflags;
 
 use core::arch::global_asm;
 
 use crate::mm::heap_allocator::heap_test;
 
+#[macro_use]
 mod lang_items;
 mod sbi;
 mod console;
