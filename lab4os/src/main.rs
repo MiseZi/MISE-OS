@@ -8,12 +8,11 @@
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
+
 #[macro_use]
 extern crate bitflags;
 
 use core::arch::global_asm;
-
-use crate::mm::heap_allocator::heap_test;
 
 #[macro_use]
 mod lang_items;
@@ -30,32 +29,25 @@ pub mod trap;
 pub mod task;
 
 global_asm!(include_str!("entry.asm"));
-global_asm!(include_str!("link_user.S"));
+global_asm!(include_str!("link_app.S"));
 
 #[no_mangle]
 pub fn rust_main() -> ! {
     clean_bss();
     println!("Hello, AmyYin!");
     println!("Hello, MiseZi!");
+    mm::init();
+    debug!("mm init done");
+    mm::remap_test();
+    debug!("remap_test done");
+    trap::init();
+    trap::enable_timer_interrupt();
+    timer::set_next_trigger();
     trace!("Run normal.");
     error!("Run normal.");
     warn!("Run normal.");
     info!("Run normal.");
     debug!("Run normal.");
-    trap::init();
-    mm::heap_allocator::init_heap();
-    loader::load_apps();
-    trap::enable_timer_interrupt();
-    timer::set_next_trigger();
-
-    trap::enable_kernel_interrupt();
-    loop {
-        if trap::check_kernel_interrupt() {
-            println!("Kernel interrupt returned");
-            break;
-        }
-    }
-    heap_test();
     task::run_first_task();
     panic!("Shutdown!");
 }
@@ -65,7 +57,8 @@ fn clean_bss() {
         fn sbss();
         fn ebss();
     }
-    (sbss as usize..ebss as usize).for_each(|a| {
-        unsafe { (a as *mut u8).write_volatile(0) }
-    });
+    unsafe {
+        core::slice::from_raw_parts_mut(sbss as usize as *mut u8, ebss as usize - sbss as usize)
+            .fill(0);
+    }
 }

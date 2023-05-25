@@ -13,5 +13,5 @@ fn panic(info: &PanicInfo) -> ! {       // 返回值为空，即不返回，发�
     } else {
         error!("Panicked: {}", info.message().unwrap());
     }
-    shutdown()
+    shutdown(true)
 }

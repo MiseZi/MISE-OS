@@ -29,11 +29,15 @@ pub fn console_putchar(c: usize) {
     sbi_call(SBI_CONSOLE_PUTCHAR, c, 0, 0);
 }
 
-pub fn shutdown() -> ! {
-    sbi_call(SBI_SHUTDOWN, 0, 0, 0);
-    loop {}
+pub fn shutdown(failure: bool) -> ! {
+    use sbi_rt::{system_reset, NoReason, Shutdown, SystemFailure};
+    if !failure {
+        system_reset(Shutdown, NoReason);
+    } else {
+        system_reset(Shutdown, SystemFailure);
+    }
+    unreachable!()
 }
-
 pub fn sleep(t: usize) {
     sbi_call(SBI_SET_TIMER, t, 0, 0);
 }
