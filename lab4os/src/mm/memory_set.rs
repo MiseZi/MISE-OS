@@ -196,6 +196,7 @@ impl MemorySet {
             satp::write(satp);
             asm!("sfence.vma");         //清空TLB
         }
+        debug!("activate done");
     }
 
     pub fn translate(&self, vpn: VirtPageNum) -> Option<PageTableEntry> {

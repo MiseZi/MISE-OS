@@ -15,6 +15,8 @@ use crate::debug;
 
 pub fn init() {
     heap_allocator::init_heap();
+    debug!("init_heap done");
     frame_allocator::init_frame_allocator();
+    debug!("init_frame_allocator done");
     KERNEL_SPACE.exclusive_access().activate();
 }
