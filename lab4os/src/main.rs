@@ -15,18 +15,19 @@ extern crate bitflags;
 use core::arch::global_asm;
 
 #[macro_use]
-mod lang_items;
-mod sbi;
 mod console;
-mod sync;
+#[macro_use]
 mod logging;
-mod loader;
 mod config;
-mod timer;
+mod lang_items;
+mod loader;
 mod mm;
+mod sbi;
+mod sync;
 pub mod syscall;
-pub mod trap;
 pub mod task;
+mod timer;
+pub mod trap;
 
 global_asm!(include_str!("entry.asm"));
 global_asm!(include_str!("link_app.S"));

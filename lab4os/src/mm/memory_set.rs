@@ -1,10 +1,15 @@
+use super::{frame_alloc, FrameTracker};
+use super::{PTEFlags, PageTable, PageTableEntry};
+use super::{PhysAddr, PhysPageNum, VirtAddr, VirtPageNum};
+use super::{StepByOne, VPNRange};
+use crate::config::{MEMORY_END, MMIO, PAGE_SIZE, TRAMPOLINE, TRAP_CONTEXT, USER_STACK_SIZE};
+use crate::sync::UPSafeCell;
+use alloc::collections::BTreeMap;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
 use core::arch::asm;
-
-use alloc::{collections::BTreeMap, vec::Vec, sync::Arc};
+use lazy_static::*;
 use riscv::register::satp;
-use crate::{config::{PAGE_SIZE, MEMORY_END, USER_STACK_SIZE, TRAMPOLINE, TRAP_CONTEXT, MMIO}, mm::address::StepByOne, println, sync::UPSafeCell, debug};
-use super::{page_table::{PageTable, PTEFlags}, address::{VirtPageNum, VPNRange, VirtAddr, PhysPageNum, PhysAddr}, frame_allocator::{FrameTracker, frame_alloc}, PageTableEntry};
-use lazy_static::lazy_static;
 
 
 extern "C" {
@@ -34,9 +39,9 @@ pub enum MapType {
 bitflags! {
     pub struct MapPermission: u8 {
         const R = 1 << 1;
-        const W = 1 << 1;
-        const X = 1 << 1;
-        const U = 1 << 1;
+        const W = 1 << 2;
+        const X = 1 << 3;
+        const U = 1 << 4;
     }
 }
 
@@ -174,19 +179,33 @@ impl MemorySet {
         // guard page
         user_stack_bottom += PAGE_SIZE;
         let user_stack_top = user_stack_bottom + USER_STACK_SIZE;
-        memory_set.push(MapArea::new(
+        memory_set.push(
+            MapArea::new(
             user_stack_bottom.into(),
             user_stack_top.into(),
             MapType::Framed,
             MapPermission::R | MapPermission::W | MapPermission::U,
-        ), None);
+            ),
+        None);
+        // used in sbrk
+        memory_set.push(
+            MapArea::new(
+                user_stack_top.into(),
+                user_stack_top.into(),
+                MapType::Framed,
+                MapPermission::R | MapPermission::W | MapPermission::U,
+            ),
+            None,
+        );
         // map TrapContext
-        memory_set.push(MapArea::new(
+        memory_set.push(
+            MapArea::new(
             TRAP_CONTEXT.into(),
             TRAMPOLINE.into(),
             MapType::Framed,
             MapPermission::R | MapPermission::W,
-        ), None);
+        ),
+        None);
         (memory_set, user_stack_top, elf.header.pt2.entry_point() as usize)
     }
 
@@ -196,7 +215,6 @@ impl MemorySet {
             satp::write(satp);
             asm!("sfence.vma");         //清空TLB
         }
-        debug!("activate done");
     }
 
     pub fn translate(&self, vpn: VirtPageNum) -> Option<PageTableEntry> {
@@ -265,6 +283,7 @@ impl MapArea {
             self.map_one(page_table, vpn);
         }
     }
+    #[allow(unused)]
     pub fn unmap(&mut self, page_table: &mut PageTable) {
         for vpn in self.vpn_range {
             self.unmap_one(page_table, vpn);
@@ -305,16 +324,13 @@ impl MapArea {
         let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
         page_table.map(vpn, ppn, pte_flags);
     }
+    #[allow(unused)]
     pub fn unmap_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
-        match self.map_type {
-            MapType::Framed => {
-                self.data_frames.remove(&vpn);
-            }
-            _ => {}
+        if self.map_type == MapType::Framed {
+            self.data_frames.remove(&vpn);
         }
         page_table.unmap(vpn);
     }
-    #[allow(unused)]
     pub fn shrink_to(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
         for vpn in VPNRange::new(new_end, self.vpn_range.get_end()) {
             self.unmap_one(page_table, vpn)
