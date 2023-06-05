@@ -78,6 +78,17 @@ impl MemorySet {
             permission,
         ), None);
     }
+    pub fn remove_area_with_start_vpn(&mut self, start_vpn: VirtPageNum) {
+        if let Some((idx, area)) = self
+            .areas
+            .iter_mut()
+            .enumerate()
+            .find(|(_, area)| area.vpn_range.get_start() == start_vpn)
+        {
+            area.unmap(&mut self.page_table);
+            self.areas.remove(idx);
+        }
+    }
     /// build kernel map area, ch4-5
     pub fn new_kernel() -> Self {
         let mut memory_set = Self::new_bare();

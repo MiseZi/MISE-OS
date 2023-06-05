@@ -13,6 +13,9 @@ mod context;
 mod switch;
 #[allow(clippy::module_inception)]
 mod task;
+mod pid;
+mod manager;
+mod processor;
 
 use crate::loader::{get_app_data, get_num_app};
 use crate::println;
