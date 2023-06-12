@@ -6,7 +6,7 @@ fn panic(info: &PanicInfo) -> ! {       // 返回值为空，即不返回，发�
     if let Some(location) = info.location() {
         error!(
             "Panic at {}:{} {}",
-            locatioman.file(),
+            location.file(),
             location.line(),
             info.message().unwrap()
         );
