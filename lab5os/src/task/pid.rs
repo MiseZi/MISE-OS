@@ -93,3 +93,7 @@ impl Drop for KernelStack {
             .remove_area_with_start_vpn(kernel_stack_bottom_va.into());
     }
 }
+
+pub fn pid_alloc() -> PidHandle {
+    PID_ALLOCATOR.exclusive_access().alloc()
+}

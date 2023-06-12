@@ -25,7 +25,7 @@ mod mm;
 mod sbi;
 mod sync;
 pub mod syscall;
-pub mod task;
+mod task;
 mod timer;
 pub mod trap;
 
@@ -38,9 +38,8 @@ pub fn rust_main() -> ! {
     println!("Hello, AmyYin!");
     println!("Hello, MiseZi!");
     mm::init();
-    debug!("mm init done");
     mm::remap_test();
-    debug!("remap_test done");
+    task::add_initproc();
     trap::init();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
@@ -49,7 +48,8 @@ pub fn rust_main() -> ! {
     warn!("Run normal.");
     info!("Run normal.");
     debug!("Run normal.");
-    task::run_first_task();
+    loader::list_apps();
+    task::processor::run_tasks();
     panic!("Shutdown!");
 }
 

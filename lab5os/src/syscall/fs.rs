@@ -1,5 +1,5 @@
+use crate::task::processor::current_user_token;
 use crate::task::suspend_current_and_run_next;
-use crate::{print, task::current_user_token};
 use crate::mm::translated_byte_buffer;
 use crate::sbi::console_getchar;
 

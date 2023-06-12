@@ -33,9 +33,11 @@ lazy_static! {
 pub fn take_current_task() -> Option<Arc<TaskControlBlock>> {
     PROCESSOR.exclusive_access().take_current()
 }
+
 pub fn current_task() -> Option<Arc<TaskControlBlock>> {
     PROCESSOR.exclusive_access().current()
 }
+
 pub fn current_user_token() -> usize {
     let task = current_task().unwrap();
     let token = task.inner_exclusive_access().get_user_token();

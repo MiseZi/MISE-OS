@@ -3,7 +3,7 @@
 
 use core::arch::{global_asm, asm};
 use riscv::register::{stvec, mtvec::TrapMode, scause::{self, Trap, Exception, Interrupt}, stval, sie, sstatus};
-use crate::{syscall::syscall, timer::set_next_trigger, task::{suspend_current_and_run_next, exit_current_and_run_next, current_trap_cx, current_user_token}, println, config::{TRAMPOLINE, TRAP_CONTEXT}};
+use crate::{syscall::syscall, timer::set_next_trigger, task::{suspend_current_and_run_next, exit_current_and_run_next, processor::{current_trap_cx, current_user_token}}, println, config::{TRAMPOLINE, TRAP_CONTEXT}};
 pub use context::TrapContext;
 
 mod context;
@@ -30,24 +30,30 @@ pub fn enable_timer_interrupt() {
 /// handle an interrupt, exception, or system call from user space
 pub fn trap_handler() -> ! {
     set_kernel_trap_entry();
-    let cx = current_trap_cx();
     let scause = scause::read();
     let stval = stval::read();
     match scause.cause() {
         Trap::Exception(Exception::UserEnvCall) => {
+            let mut cx = current_trap_cx();
             cx.sepc += 4;
-            cx.x[10] = syscall(cx.x[17], [cx.x[10], cx.x[11], cx.x[12]]) as usize;
+            let result =syscall(cx.x[17], [cx.x[10], cx.x[11], cx.x[12]]) as usize;
+            cx = current_trap_cx();
+            cx.x[10] = result;
         }
         Trap::Exception(Exception::StoreFault)
         | Trap::Exception(Exception::StorePageFault)
         | Trap::Exception(Exception::LoadFault)
         | Trap::Exception(Exception::LoadPageFault) => {
-            println!("[kernel] PageFault in application, bad addr = {:#x}, bad instruction = {:#x}, kernel killed it.", stval, cx.sepc);
-            exit_current_and_run_next();
+            println!("[kernel] {:?} in application, bad addr = {:#x}, bad instruction = {:#x}, core dumped.", 
+            scause.cause(), 
+            stval, 
+            current_trap_cx().sepc
+        );
+            exit_current_and_run_next(-2);
         }
         Trap::Exception(Exception::IllegalInstruction) => {
             println!("[kernel] IllegalInstruction in application, kernel killed it.");
-            exit_current_and_run_next();
+            exit_current_and_run_next(-3);
         }
         Trap::Interrupt(Interrupt::SupervisorTimer) => {
             set_next_trigger();
