@@ -3,16 +3,23 @@
 mod fs;
 mod process;
 
+use core::u32;
+use core::usize;
+
 use fs::sys_write;
 use fs::sys_read;
 use process::sys_exit;
 
+use self::process::sys_close;
 use self::process::sys_exec;
 use self::process::sys_fork;
 use self::process::sys_getpid;
+use self::process::sys_open;
 use self::process::sys_waitpid;
 use self::process::{sys_yield, sys_get_time};
 
+const SYSCALL_OPEN: usize = 56;
+const SYSCALL_CLOSE: usize = 57;
 const SYSCALL_READ: usize = 63;
 const SYSCALL_WRITE: usize = 64;
 const SYSCALL_EXIT: usize = 93;
@@ -34,6 +41,8 @@ pub fn syscall(syscall_id: usize, args: [usize; 3]) -> isize {
         SYSCALL_FORK => sys_fork(),
         SYSCALL_EXEC => sys_exec(args[0] as *const u8),
         SYSCALL_WAITPID => sys_waitpid(args[0] as isize, args[1] as *mut i32),
+        SYSCALL_OPEN => sys_open(path: &str, flags: u32),
+        SYSCALL_CLOSE => sys_close(fd: usize),
         _ => panic!("Unsupported syscall_id: {}", syscall_id),
     }
 }

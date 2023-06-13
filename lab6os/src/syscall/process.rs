@@ -82,3 +82,11 @@ pub fn sys_exec(path: *const u8) -> isize {
         -1
     }
 }
+
+pub fn sys_open(path: &str, flags: u32) -> isize {
+    
+}
+
+pub fn sys_close(fd: usize) -> isize {
+    
+}
