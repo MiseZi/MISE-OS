@@ -2,6 +2,9 @@
 
 mod block_cache;
 mod block_dev;
+mod layout;
+mod bitmap;
+
 
 extern crate alloc;
 

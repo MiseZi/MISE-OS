@@ -28,7 +28,7 @@ impl BlockCache {
         f(self.get_ref(offset))
     }
 
-    pub fn modifiy<T, V>(&mut self, offset: usize, f: impl FnOnce(&T) -> V) -> V {
+    pub fn modify<T, V>(&mut self, offset: usize, f: impl FnOnce(&mut T) -> V) -> V {
         f(self.get_mut(offset))
     }
 
@@ -36,14 +36,20 @@ impl BlockCache {
         &self.cache[offset] as *const _ as usize
     }
 
-    pub fn get_ref<T>(&self, offset: usize) -> &T where T: Sized {
+    pub fn get_ref<T>(&self, offset: usize) -> &T
+    where
+        T: Sized,
+    {
         let type_size = core::mem::size_of::<T>();
         assert!(offset + type_size <= BLOCK_SZ);
         let addr = self.addr_of_offset(offset);
         unsafe { &*(addr as *const T) }
     }
 
-    pub fn get_mut<T>(&mut self, offset: usize) -> &mut T where T: Sized {
+    pub fn get_mut<T>(&mut self, offset: usize) -> &mut T
+    where
+        T: Sized,
+    {
         let type_size = core::mem::size_of::<T>();
         assert!(offset + type_size <= BLOCK_SZ);
         self.modified = true;
