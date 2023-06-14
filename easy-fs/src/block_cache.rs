@@ -80,7 +80,7 @@ impl BlockCacheManager {
         Self { queue: VecDeque::new() }
     }
 
-    pub fn get_block_cache(&mut self, block_id: usize, block_device: Arc<dyn BlockDevice>) -> Arc<Mutex<BlockCache>> {
+    pub fn block_cache(&mut self, block_id: usize, block_device: Arc<dyn BlockDevice>) -> Arc<Mutex<BlockCache>> {
         if let Some(pair) = self.queue
             .iter()
             .find(|pair| pair.0 == block_id) {
@@ -114,9 +114,9 @@ lazy_static! {
     );
 }
 
-pub fn get_block_cache(
+pub fn block_cache(
     block_id: usize,
     block_device: Arc<dyn BlockDevice>
 ) -> Arc<Mutex<BlockCache>> {
-    BLOCK_CACHE_MANAGER.lock().get_block_cache(block_id, block_device)
+    BLOCK_CACHE_MANAGER.lock().block_cache(block_id, block_device)
 }
