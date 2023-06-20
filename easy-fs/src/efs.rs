@@ -4,7 +4,7 @@
 use alloc::sync::Arc;
 use spin::Mutex;
 
-use crate::{block_dev::BlockDevice, bitmap::Bitmap, layout::{DiskInode, DiskInodeType, SuperBlock}, BLOCK_SZ, block_cache::block_cache};
+use crate::{block_dev::BlockDevice, bitmap::Bitmap, layout::{DiskInode, DiskInodeType, SuperBlock}, BLOCK_SZ, block_cache::block_cache, vfs::Inode};
 
 
 
@@ -143,6 +143,18 @@ impl EasyFileSystem {
         self.data_bitmap.dealloc(
             &self.block_device,
             (block_id - self.data_area_start_block) as usize
+        )
+    }
+
+    /// 
+    pub fn root_inode(efs: &Arc<Mutex<Self>>) -> Inode {
+        let block_device = Arc::clone(&efs.lock().block_device);
+        let (block_id, block_offset) = efs.lock().disk_inode_pos(0);
+        Inode::new(
+            block_id, 
+            block_offset, 
+            Arc::clone(efs), 
+            block_device,
         )
     }
 }
